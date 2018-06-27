@@ -20,14 +20,18 @@ void initialize_readers_writer() {
      * Initialize the shared structures, including those used for
      * synchronization.
      */
+    init_resource(&data, "my_data");
 }
 
 
 void rw_read(char *value, int len) {
-    printf("NOTHING IMPLEMENTED YET FOR rw_read\n");
+    printf("[rw_read] Value: %s, len: %d\n", value, len);
+    print_stats(&data);
+    read_resource(&data, value, len);
 }
 
 
 void rw_write(char *value, int len) {
-    printf("NOTHING IMPLEMENTED YET FOR rw_write\n");
+    printf("[rw_write] Value: %s, len: %d\n", value, len);
+    write_resource(&data, value, len);
 }
