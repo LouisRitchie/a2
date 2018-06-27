@@ -37,7 +37,6 @@ void rw_read(char *value, int len) {
 
     pthread_mutex_lock(&mutex);
     while (writing) {
-        printf("here");
         pthread_cond_wait(&cond, &mutex);
     }
     reading++;
@@ -47,7 +46,7 @@ void rw_read(char *value, int len) {
 
     pthread_mutex_lock(&mutex);
     reading--;
-    pthread_cond_signal(&cond);
+    pthread_cond_broadcast(&cond);
     pthread_mutex_unlock(&mutex);
 }
 
@@ -67,6 +66,6 @@ void rw_write(char *value, int len) {
 
     pthread_mutex_lock(&mutex);
     writing--;
-    pthread_cond_signal(&cond);
+    pthread_cond_broadcast(&cond);
     pthread_mutex_unlock(&mutex);
 }
