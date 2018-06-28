@@ -14,11 +14,8 @@
  */
 
 static resource_t codeword;
-
-static sem_t semaphore;
-// sem_post - increment
-// sem_wait - decrement, if 0 then block until > 0.
-// sem_init(&semaphore, 1, 0);
+static sem_t waiting_for_group, writing;
+static int count, meet_first, group_size;
 
 void initialize_meetup(int n, int mf) {
     char label[100];
@@ -34,8 +31,12 @@ void initialize_meetup(int n, int mf) {
      * Initialize the shared structures, including those used for
      * synchronization.
      */
-    sem_init(&semaphore, 1, 0);
+    sem_init(&waiting_for_group, 1, 0);
+    sem_init(&writing, 1, 1);
+    count = 0;
     init_resource(&codeword, "codeword");
+    meet_first = mf;
+    group_size = n;
 }
 
 
@@ -43,5 +44,19 @@ void join_meetup(char *value, int len) {
     printf("[join_meetup] Value: %s, len: %d\n", value, len);
     print_stats(&codeword);
 
-    write_resource(&codeword, value, len);
+    if ((count == 0 && meet_first) || (count == group_size - 1 && !meet_first)) {
+        sem_wait(&writing);
+        write_resource(&codeword, value, len);
+        sem_post(&writing);
+    }
+
+    if (count == group_size - 1) {
+        count = 0;
+    } else {
+        count++;
+        sem_wait(&waiting_for_group);
+    }
+
+    sem_post(&waiting_for_group);
+    read_resource(&codeword, value, len);
 }
