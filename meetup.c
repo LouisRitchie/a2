@@ -45,9 +45,12 @@ void join_meetup(char *value, int len) {
     print_stats(&codeword);
     int my_count = ++count;
 
-    if ((my_count == 1 && meet_first) || (my_count == group_size && !meet_first)) {
+    if (my_count == 1) {
         sem_destroy(&writing);
         sem_init(&writing, 1, 0);
+    }
+
+    if ((my_count == 1 && meet_first) || (my_count == group_size && !meet_first)) {
         write_resource(&codeword, value, len);
         sem_post(&writing);
     } else {
