@@ -43,27 +43,26 @@ void initialize_meetup(int n, int mf) {
 void join_meetup(char *value, int len) {
     printf("[join_meetup] Value: %s, len: %d\n", value, len);
     print_stats(&codeword);
+    int my_count = ++count;
 
-    if ((count == 0 && meet_first) || (count == group_size - 1 && !meet_first)) {
+    if ((my_count == 1 && meet_first) || (my_count == group_size && !meet_first)) {
         sem_destroy(&writing);
         sem_init(&writing, 1, 0);
         write_resource(&codeword, value, len);
+        sem_post(&writing);
+    } else {
+        sem_wait(&writing);
         sem_post(&writing);
     }
 
     // if we have enough threads, reset count and proceed;
     // else, increment count and wait.
-    if (count == group_size - 1) {
+    if (my_count == group_size) {
         count = 0;
     } else {
-        count++;
         sem_wait(&waiting_for_group);
     }
 
     sem_post(&waiting_for_group);
-
-    sem_wait(&writing);
-    sem_post(&writing);
-
     read_resource(&codeword, value, len);
 }
